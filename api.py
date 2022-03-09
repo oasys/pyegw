@@ -161,7 +161,7 @@ class SwitchEndpoint(Endpoint):
             if response.Response.Status != "200":
                 if not silent:
                     print("\n".join(response.Response.ErrorMessage))
-                return False
+                return []
             switches += response.SwitchCollection.SwitchEntry
             curr_switch_id = response.SwitchStatistics.HighestSwitchIDReturned + 1
             stats = response.SwitchStatistics
