@@ -30,7 +30,7 @@ class Api(object):
 
         self.locations = LocationEndpoint(self)
         self.switches = SwitchEndpoint(self)
-        # self.subnets = SubnetEndpointself)
+        self.subnets = SubnetEndpoint(self)
 
 
 class Endpoint(object):
@@ -59,6 +59,36 @@ class Endpoint(object):
             else normalize(v) == normalize(b[k])
             for k, v in self.client.items(a)
         )
+
+
+class SubnetEndpoint(Endpoint):
+    wsdl = "soapschemas/EGW/custSoapSubnets/custSoapSubnetsSimple.wsdl"
+    location = "/custSoapSubnets/"
+
+    def get(self, erl_id):
+        args = {
+            "authentication": {**self.args},
+            "subnetIdent": {"erl_id": erl_id},
+        }
+        response = self.client.service.qrySubnetRequest(args)
+        if response.status != 200:
+            # TODO print error (silent?)
+            return []
+        print(response)
+
+    def set(self):
+        args = {
+            "authentication": {**self.args},
+            "subnetIdent": {"erl_id": erl_id},
+        }
+
+        pass
+
+    def from_dict(self, data):
+        pass
+
+    def compare(self, data):
+        pass
 
 
 class SwitchEndpoint(Endpoint):
