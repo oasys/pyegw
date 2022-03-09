@@ -69,7 +69,7 @@ class SwitchEndpoint(Endpoint):
     def _load_all_entries(self):
         """Build local cache of all entries in EGW database"""
         if self._all_entries == "UNINITIALIZED":
-            self._all_entries = self.get_all()
+            self._all_entries = self.get_all().SwitchEntry
 
     def _check_response(self, response, field=None, silent=False):
         if response.Response.Status != "200":
@@ -85,37 +85,54 @@ class SwitchEndpoint(Endpoint):
         self._load_all_entries()
         match = None
 
-        for switch in self._all_entries[0]:
+        for switch in self._all_entries:
             if switch.switch_ip == data.switch_ip:
                 if is_switch_entry:
                     match = all([switch[k] == v for k, v in data])
+                    if match and remove_on_match:
+                        self.remove_entry(switch.switch_ip)
                 else:
+                    port_name = data.port_entry.switch_port_name
                     for port in getattr(switch, "port_entry", []):
                         # CSV import in web GUI capitalizes all port names
-                        # so we match them regardless of case, and update them correctly
-                        if (
-                            data.port_entry.switch_port_name.lower()
-                            == port.switch_port_name.lower()
-                        ):
-                            match = all([port[k] == v for k, v in data.port_entry])
-        if match and remove_on_match:
-            self.remove_entry(data)
+                        if port_name.lower() == port.switch_port_name.lower():
+                            match = all(
+                                [
+                                    port[k] == v
+                                    for k, v in data.port_entry
+                                    if k != "switch_port_name"
+                                ]
+                                + [
+                                    port[k].lower() == v.lower()
+                                    for k, v in data.port_entry
+                                    if k == "switch_port_name"
+                                ]
+                            )
+                            if match and remove_on_match:
+                                self.remove_entry(switch.switch_ip, port_name)
         return match
 
-    def remove_entry(self, data):
+    def remove_entry(self, switch_ip, port_name=None):
         """Remove port or switch entry from local cache"""
-        if is_switch_entry := getattr(data, "port_entry", []) == []:
-            # do not remove switch until all ports deleted
-            return True
         self._load_all_entries()
-        for switch in self._all_entries[0]:
-            if switch.switch_ip == data.switch_ip:
-                if not is_switch_entry:
+        for switch in self._all_entries:
+            if switch.switch_ip == switch_ip:
+                if port_name:
                     for port in switch.port_entry:
-                        if data.port_entry.switch_port_name == port.switch_port_name:
+                        if port_name == port.switch_port_name:
                             switch.port_entry.remove(port)
                 if len(switch.port_entry) == 0:
-                    self._all_entries[0].remove(switch)
+                    self._all_entries.remove(switch)
+
+    def get_single(self, switch_ip, *args, **kwargs):
+        """Return switch by exact match on switch IP address"""
+        exact_match = [
+            sw
+            for sw in self.get(switch_ip, *args, **kwargs).SwitchEntry
+            if sw.switch_ip == switch_ip
+        ]
+        if len(exact_match) == 1:
+            return exact_match[0]
 
     def get_all(self):
         """Retrieve all switches (and their ports) from EGW database"""
@@ -136,7 +153,7 @@ class SwitchEndpoint(Endpoint):
     def set(self, data, remove_on_update=True):
         """Add or Update port/switch entry in EGW database"""
         is_switch_entry = getattr(data, "port_entry", []) == []
-        is_existing_switch = self.get(data.switch_ip, silent=True)
+        is_existing_switch = self.get_single(data.switch_ip, silent=True)
         entry_type = (
             "AddSwitchEntry"
             if is_switch_entry and not is_existing_switch
@@ -157,26 +174,28 @@ class SwitchEndpoint(Endpoint):
         )
         if result := self._check_response(request(args)) and remove_on_update:
             self.remove_entry(data)
+        if result:
+            print(
+                f"switch {data.switch_ip} {'added' if is_switch_entry else 'updated'}"
+            )
         return result
 
-    def delete(self, data, remove_from_all_entries=True, force=False):
-        is_switch_entry = getattr(data, "port_entry", []) == []
-        if is_switch_entry and not force:
+    def delete(
+        self, switch_ip, port_name=None, remove_from_all_entries=True, force=False
+    ):
+        if port_name and not force:
             # only delete switch if it has no ports
-            if len(getattr(self.get(data.switch_ip), "port_entry", [])) == 0:
-                return self.delete(data, force=True)
+            # TODO look up in cache instead
+            if len(getattr(self.get_single(switch_ip), "port_entry", [])) == 0:
+                return self.delete(switch_ip, force=True)
             # NOP if switch has ports (will be deleted when last port is deleted)
             return True
 
-        port_criteria = (
-            {"switch_port_name": data.port_entry.switch_port_name}
-            if not is_switch_entry
-            else {}
-        )
+        port_criteria = {"switch_port_name": port_name} if port_name else {}
         args = {
             "Authentication": {k.capitalize(): v for k, v in self.args.items()},
             "DeleteSwitchEntry": {
-                "switch_port_combination": {"switch_ip": data.switch_ip} | port_criteria
+                "switch_port_combination": {"switch_ip": switch_ip} | port_criteria
             },
         }
         if (
@@ -185,28 +204,25 @@ class SwitchEndpoint(Endpoint):
             )
             and remove_from_all_entries
         ):
-            self.remove_entry(data)
+            self.remove_entry(switch_ip, port_name)
         if (
-            not is_switch_entry
-            and len(getattr(self.get(data.switch_ip), "port_entry", [])) == 0
+            port_name
+            and len(getattr(self.get_single(switch_ip), "port_entry", [])) == 0
         ):
             # if we just deleted the last port, also delete the switch
-            return result and self.delete(data, force=True)
+            return result and self.delete(switch_ip, force=True)
         return result
 
     def delete_remaining(self):
-        for switch in self._all_entries[0]:
+        for switch in self._all_entries:
             if len(getattr(switch, "port_entry")) > 0:
                 for port in getattr(switch, "port_entry", []):
-                    # FIXME
-                    entry = copy(switch)
-                    entry.port_entry = copy(port)
-                    if result := self.delete(entry):
+                    if result := self.delete(switch.switch_ip, port.switch_port_name):
                         print(
                             f"deleted {port.switch_port_name} on switch {switch.switch_ip}"
                         )
             else:
-                if result := self.delete(switch):
+                if result := self.delete(switch.switch_ip):
                     print(f"deleted switch {switch.switch_ip}")
 
     def from_dict(self, data):
