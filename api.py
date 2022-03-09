@@ -69,14 +69,20 @@ class SwitchEndpoint(Endpoint):
     def _load_all_entries(self):
         """Build local cache of all entries in EGW database"""
         if self._all_entries == "UNINITIALIZED":
-            self._all_entries = self.get_all().SwitchEntry
+            self._all_entries = self.get_all()
 
     def _check_response(self, response, field=None, silent=False):
         if response.Response.Status != "200":
             if not silent:
                 print("\n".join(response.Response.ErrorMessage))
         if field:
-            return getattr(response, field, None)
+            obj = response
+            for each in field.split("."):
+                try:
+                    obj = getattr(obj, each)
+                except AttributeError:
+                    return []
+            return obj
         else:
             return response.Response.Status == "200"
 
@@ -119,7 +125,7 @@ class SwitchEndpoint(Endpoint):
             if switch.switch_ip == switch_ip:
                 if port_name:
                     for port in switch.port_entry:
-                        if port_name == port.switch_port_name:
+                        if port_name.lower() == port.switch_port_name.lower():
                             switch.port_entry.remove(port)
                 if len(switch.port_entry) == 0:
                     self._all_entries.remove(switch)
@@ -128,7 +134,7 @@ class SwitchEndpoint(Endpoint):
         """Return switch by exact match on switch IP address"""
         exact_match = [
             sw
-            for sw in self.get(switch_ip, *args, **kwargs).SwitchEntry
+            for sw in self.get(switch_ip, *args, **kwargs)
             if sw.switch_ip == switch_ip
         ]
         if len(exact_match) == 1:
@@ -140,25 +146,37 @@ class SwitchEndpoint(Endpoint):
 
     def get(self, switch_ip, silent=False):
         """Retrieve specific switch (and its ports) from EGW database"""
+        switches = []
         args = {
             "Authentication": {k.capitalize(): v for k, v in self.args.items()},
-            "QuerySwitchEntry": {"SwitchIpOrERLCombination": {"switch_ip": switch_ip}},
+            "QuerySwitchEntry": {
+                "SwitchIpOrERLCombination": {"switch_ip": switch_ip},
+            },
         }
-        return self._check_response(
-            self.client.service.querySwitchRequest(args),
-            "SwitchCollection",
-            silent=silent,
-        )
+
+        curr_switch_id = 0
+        while True:  # handle paging
+            args["QuerySwitchEntry"]["switch_id"] = curr_switch_id
+            response = self.client.service.querySwitchRequest(args)
+            if response.Response.Status != "200":
+                if not silent:
+                    print("\n".join(response.Response.ErrorMessage))
+                return False
+            switches += response.SwitchCollection.SwitchEntry
+            curr_switch_id = response.SwitchStatistics.HighestSwitchIDReturned + 1
+            stats = response.SwitchStatistics
+            if stats.TotalNumberOfSwitches - stats.CountOfSwitchesReturned == 0:
+                break
+
+        return switches
 
     def set(self, data, remove_on_update=True):
         """Add or Update port/switch entry in EGW database"""
         is_switch_entry = getattr(data, "port_entry", []) == []
-        is_existing_switch = self.get_single(data.switch_ip, silent=True)
-        entry_type = (
-            "AddSwitchEntry"
-            if is_switch_entry and not is_existing_switch
-            else "UpdateSwitchEntry"
+        is_new_switch = is_switch_entry and not self.get_single(
+            data.switch_ip, silent=True
         )
+        entry_type = "AddSwitchEntry" if is_new_switch else "UpdateSwitchEntry"
         args = {
             "Authentication": {k.capitalize(): v for k, v in self.args.items()},
             entry_type: {
@@ -170,14 +188,12 @@ class SwitchEndpoint(Endpoint):
 
         request = getattr(
             self.client.service,
-            "addSwitchRequest" if is_switch_entry else "updateSwitchRequest",
+            "addSwitchRequest" if is_new_switch else "updateSwitchRequest",
         )
         if result := self._check_response(request(args)) and remove_on_update:
             self.remove_entry(data)
         if result:
-            print(
-                f"switch {data.switch_ip} {'added' if is_switch_entry else 'updated'}"
-            )
+            print(f"switch {data.switch_ip} {'added' if is_new_switch else 'updated'}")
         return result
 
     def delete(
