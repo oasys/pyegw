@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="e911enable"
+             targetNamespace="http://soap.911enable.com/wsdl"
+             xmlns:tns="http://soap.911enable.com/wsdl"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:xsd1="http://soap.911enable.com/schema">
+
+    <documentation>
+        Web service to Add, Update, Delete, Query, Report Switche(s) and its(their) port(s) to the EGW.
+    </documentation>
+
+    <types>
+        <xsd:schema
+            targetNamespace="http://soap.911enable.com/schema"
+            xmlns="http://www.w3.org/2001/XMLSchema">
+
+          <xsd:complexType name="Authentication">
+            <xsd:sequence>
+              <xsd:element name="Username" type="xsd:string"/>
+              <xsd:element name="Password" type="xsd:string"/>
+            </xsd:sequence>
+          </xsd:complexType>
+
+          <xsd:complexType name="Response">
+            <xsd:sequence>
+              <xsd:element name="Status" type="xsd1:ReturnCodeType"/>
+              <xsd:element name="Message" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+              <xsd:element name="ErrorMessage" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+          </xsd:complexType>
+
+          <xsd:simpleType name="ReturnCodeType">
+            <xsd:annotation>
+              <xsd:documentation>200=Success; 400=Bad Request; 401=Unauthorized; 404=Not Found; 500=Internal Server Error;</xsd:documentation>
+            </xsd:annotation>
+            <xsd:restriction base="xsd:string">
+              <xsd:enumeration value="200" />
+              <xsd:enumeration value="400" />
+              <xsd:enumeration value="401" />
+              <xsd:enumeration value="404" />
+              <xsd:enumeration value="500" />
+            </xsd:restriction>
+          </xsd:simpleType>
+
+          <xsd:simpleType name="IPv4">
+            <xsd:annotation>
+              <xsd:documentation>An IPv4 dot-decimal notation. From http://en.wikipedia.org/wiki/IPv4</xsd:documentation>
+            </xsd:annotation>
+            <xsd:restriction base="xsd:string">
+              <xsd:pattern value="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$" />
+            </xsd:restriction>
+          </xsd:simpleType>
+
+          <xsd:complexType name="QuerySwitch">
+                <xsd:sequence>
+                    <xsd:element name="Authentication" type="xsd1:Authentication" minOccurs="1" maxOccurs="1"/>
+                    <xsd:element name="QuerySwitchEntry" type="xsd1:QuerySwitchEntry" minOccurs="1" maxOccurs="1"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="QuerySwitchEntry">
+              <xsd:sequence>
+                <xsd:element name="switch_id" type="xsd:integer" minOccurs="0" maxOccurs="1">
+                  <xsd:annotation>
+                    <xsd:documentation>If switch_id is specified, the switches will be returned from the specified switch id upto the next batch (matching the criteria) else the first batch (matching the criteria) will be returned.</xsd:documentation>
+                  </xsd:annotation>
+                </xsd:element>
+
+                <xsd:element name = "SwitchIpOrERLCombination">
+                  <xsd:annotation>
+                    <xsd:documentation>A switch can be queried either by specifying its erl or by its IP.</xsd:documentation>
+                  </xsd:annotation>
+                  <xsd:complexType>
+                    <xsd:choice>
+                      <xsd:element name="switch_ip" type="xsd:string">
+                        <xsd:annotation>
+                          <xsd:documentation>The switch IP can be specified as either its complete IP or partial IP. All the switches matching the IP will be returned</xsd:documentation>
+                        </xsd:annotation>
+                      </xsd:element>
+                      <xsd:element name="switch_or_port_erl" type="xsd:string">
+                        <xsd:annotation>
+                          <xsd:documentation>The switches and the ports will be matched against the specified erl and all the matching switches and their ports will be returned.</xsd:documentation>
+                        </xsd:annotation>
+                      </xsd:element>
+                    </xsd:choice>
+                  </xsd:complexType>
+                </xsd:element>
+              </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="QueryResponse">
+                <xsd:sequence>
+                  <xsd:element name="Response" type="xsd1:Response" minOccurs="1" maxOccurs="1"/>
+                  <xsd:element name="SwitchStatistics" type="xsd1:SwitchStatistics" minOccurs="0" maxOccurs="1"/>
+                  <xsd:element name="SwitchCollection" type="xsd1:SwitchCollection" minOccurs="0" maxOccurs="1"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+          <xsd:complexType name="SwitchStatistics">
+            <xsd:sequence>
+              <xsd:element name="LowestSwitchIDReturned" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+              <xsd:element name="HighestSwitchIDReturned" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+              <xsd:element name="CountOfSwitchesReturned" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+              <xsd:element name="TotalNumberOfSwitches" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+            </xsd:sequence>
+          </xsd:complexType>
+
+          <xsd:complexType name="SwitchCollection">
+                <xsd:sequence>
+                    <xsd:element name="SwitchEntry" type="xsd1:SwitchEntry" minOccurs="1" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="SwitchEntry">
+                <xsd:sequence>
+                    <xsd:element name="switch_id" type="xsd:integer" minOccurs="1"/>
+                    <xsd:element name="switch_ip" type="xsd1:IPv4" minOccurs="1"/>
+                    <xsd:element name="snmp_version" type="xsd:string" minOccurs="1"/>
+                    <xsd:element name="snmp_community" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="snmp_security_name" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="snmp_security_level" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="snmp_auth_protocol" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="snmp_auth_passphrase" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="snmp_encrypt_protocol" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="snmp_encrypt_passphrase" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="snmp_port" type="xsd:integer"  minOccurs="1"/>
+                    <xsd:element name="snmp_timeout" type="xsd:integer" minOccurs="1"/>
+                    <xsd:element name="snmp_retry_count" type="xsd:integer" minOccurs="1"/>
+                    <xsd:element name="switch_erl" type="xsd:string" minOccurs="1"/>
+                    <xsd:element name="switch_type" type="xsd:string" minOccurs="1"/>
+                    <xsd:element name="switch_is_scannable" type="xsd:string" minOccurs="1"/>
+                    <xsd:element name="log_level" type="xsd:string" minOccurs="1"/>
+                    <xsd:element name="switch_description" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="switch_vendor" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="switch_trunk_port_detection" type="xsd:string" minOccurs="1"/>
+                    <xsd:element name="switch_scan_voice_vlans" type="xsd:string" minOccurs="1"/>
+                    <xsd:element name="switch_voice_vlans" type="xsd:integer" minOccurs="0" maxOccurs="unbounded"/>
+                    <xsd:element name="port_entry" type="xsd1:PortEntry" minOccurs="0" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="PortEntry">
+                <xsd:sequence>
+                    <xsd:element name="switch_port_name" type="xsd:string" minOccurs="1"/>
+                    <xsd:element name="switch_port_erl" type="xsd:string" minOccurs="1"/>
+                    <xsd:element name="is_trunk_port" minOccurs="0">
+                      <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                          <xsd:enumeration value="no"/>
+                          <xsd:enumeration value="yes"/>
+                        </xsd:restriction>
+                      </xsd:simpleType>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="DeleteSwitch">
+                <xsd:sequence>
+                    <xsd:element name="Authentication" type="xsd1:Authentication" minOccurs="1" maxOccurs="1"/>
+                    <xsd:element name="DeleteSwitchEntry" type="xsd1:DeleteSwitchEntry" minOccurs="1" maxOccurs="1"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="DeleteSwitchEntry">
+                <xsd:annotation>
+                    <xsd:documentation>A switch and/or its ports can be deleted either by specifying its erl or by a combination of its IP and/or port name.</xsd:documentation>
+                </xsd:annotation>
+                <xsd:choice>
+                    <xsd:element name="switch_port_combination" type="xsd1:SwitchPortEntry"/>
+                    <xsd:element name="switch_or_port_erl">
+                        <xsd:annotation>
+                            <xsd:documentation>All the switches (and their ports) that have the matching ERL will be deleted. Next all the ports (and NOT their switches) that have the matching ERL will be deleted.</xsd:documentation>
+                        </xsd:annotation>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string">
+                                <xsd:minLength value="1"/>
+                                <xsd:maxLength value="31"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+
+            <xsd:complexType name="SwitchPortEntry">
+                <xsd:annotation>
+                    <xsd:documentation>The following combinations are possible: Switch IP/Port Name (only the specified port will be deleted); Switch IP/* (all the ports of the switch will be deleted); Switch IP (The switch and its ports will be deleted)</xsd:documentation>
+                </xsd:annotation>
+                <xsd:sequence>
+                <xsd:element name="switch_ip" type="xsd1:IPv4" minOccurs="1"/>
+                <xsd:element name="switch_port_name" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:documentation>The switch port name can be either the name of the port, in which case the specified port for the specified switch will be deleted. If the port name is specified as *, all the ports will be deleted. If the port name is missing the switch and all its ports will be deleted.</xsd:documentation>
+                    </xsd:annotation>
+                    <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                            <xsd:minLength value="1"/>
+                            <xsd:maxLength value="255"/>
+                        </xsd:restriction>
+                    </xsd:simpleType>
+                </xsd:element>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="DeleteResponse">
+                <xsd:sequence>
+                    <xsd:element name="Response" type="xsd1:Response" minOccurs="1" maxOccurs="1"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="AddSwitch">
+                <xsd:sequence>
+                  <xsd:element name="Authentication" type="xsd1:Authentication" minOccurs="1" maxOccurs="1"/>
+                  <xsd:element name="AddSwitchEntry" type="xsd1:SwitchAddUpdateEntry" minOccurs="1" maxOccurs="1"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="UpdateSwitch">
+                <xsd:sequence>
+                  <xsd:element name="Authentication" type="xsd1:Authentication" minOccurs="1" maxOccurs="1"/>
+                  <xsd:element name="UpdateSwitchEntry" type="xsd1:SwitchAddUpdateEntry" minOccurs="1" maxOccurs="1"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="SwitchAddUpdateEntry">
+                <xsd:sequence>
+                    <xsd:element name="switch_ip" type="xsd1:IPv4" minOccurs="1"/>
+                    <xsd:element name="snmp_version" minOccurs="0">
+                      <xsd:simpleType>
+                          <xsd:restriction base="xsd:string">
+                            <xsd:enumeration value="1"/>
+                            <xsd:enumeration value="2c"/>
+                            <xsd:enumeration value="3"/>
+                          </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="snmp_community" minOccurs="0">
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string">
+                                <xsd:minLength value="1"/>
+                                <xsd:maxLength value="25"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="snmp_security_name" minOccurs="0">
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string">
+                                <xsd:minLength value="1"/>
+                                <xsd:maxLength value="50"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="snmp_security_level" minOccurs="0">
+                        <xsd:simpleType>
+                          <xsd:restriction base="xsd:string">
+                            <xsd:enumeration value="noAuthNoPriv"/>
+                            <xsd:enumeration value="authNoPriv"/>
+                            <xsd:enumeration value="authPriv"/>
+                          </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="snmp_auth_protocol" minOccurs="0">
+                      <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                          <xsd:enumeration value="MD5"/>
+                          <xsd:enumeration value="SHA"/>
+                        </xsd:restriction>
+                      </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="snmp_auth_passphrase" minOccurs="0">
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string">
+                                <xsd:minLength value="1"/>
+                                <xsd:maxLength value="50"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="snmp_encrypt_protocol" minOccurs="0">
+                      <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                          <xsd:enumeration value="DES"/>
+                          <xsd:enumeration value="AES"/>
+                        </xsd:restriction>
+                      </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="snmp_encrypt_passphrase" minOccurs="0">
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string">
+                                <xsd:minLength value="1"/>
+                                <xsd:maxLength value="50"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="snmp_port" minOccurs="0">
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:integer">
+                                <xsd:minInclusive value="1"/>
+                                <xsd:maxInclusive value="65535"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="snmp_timeout" type="xsd:integer" minOccurs="0"/>
+                    <xsd:element name="snmp_retry_count" type="xsd:integer" minOccurs="0"/>
+                    <xsd:element name="switch_erl" minOccurs="0">
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string">
+                                <xsd:minLength value="1"/>
+                                <xsd:maxLength value="31"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="switch_type" minOccurs="0">
+                      <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                          <xsd:enumeration value="Auto Detect"/>
+                          <xsd:enumeration value="Cisco"/>
+                          <xsd:enumeration value="Juniper"/>
+                          <xsd:enumeration value="Bridge-MIB"/>
+                          <xsd:enumeration value="Q-Bridge-MIB"/>
+                          <xsd:enumeration value="PhyBridge-PoLRE-MIB"/>
+                          <xsd:enumeration value="PhyBridge-UniPhyer-MIB"/>
+                          <xsd:enumeration value="3-COM-Bridge-MIB"/>
+                          <xsd:enumeration value="3-COM-Q-Bridge-MIB"/>
+                        </xsd:restriction>
+                      </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="switch_is_scannable" minOccurs="0">
+                      <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                          <xsd:enumeration value="enable"/>
+                          <xsd:enumeration value="disable"/>
+                        </xsd:restriction>
+                      </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="log_level" minOccurs="0">
+                      <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                          <xsd:enumeration value="OFF"/>
+                          <xsd:enumeration value="FATAL"/>
+                          <xsd:enumeration value="ERROR"/>
+                          <xsd:enumeration value="WARN"/>
+                          <xsd:enumeration value="INFO"/>
+                          <xsd:enumeration value="TRACE"/>
+                          <xsd:enumeration value="ALL"/>
+                        </xsd:restriction>
+                      </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="switch_description" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="switch_vendor" minOccurs="0">
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string">
+                                <xsd:minLength value="0"/>
+                                <xsd:maxLength value="25"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="switch_trunk_port_detection" minOccurs="0">
+                      <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                          <xsd:enumeration value="enable"/>
+                          <xsd:enumeration value="disable"/>
+                        </xsd:restriction>
+                      </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="switch_scan_voice_vlans" minOccurs="0">
+                      <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                          <xsd:enumeration value="enable"/>
+                          <xsd:enumeration value="disable"/>
+                        </xsd:restriction>
+                      </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="switch_voice_vlans" type="xsd:integer" minOccurs="0" maxOccurs="unbounded"/>
+                    <xsd:element name="port_entry" type="xsd1:PortEntry" minOccurs="0" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="AddResponse">
+                <xsd:sequence>
+                    <xsd:element name="Response" type="xsd1:Response" minOccurs="1" maxOccurs="1"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="UpdateResponse">
+                <xsd:sequence>
+                    <xsd:element name="Response" type="xsd1:Response" minOccurs="1" maxOccurs="1"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="ReportSwitch">
+                <xsd:sequence>
+                    <xsd:element name="Authentication" type="xsd1:Authentication" minOccurs="1" maxOccurs="1"/>
+                    <xsd:element name="ReportSwitchEntry" type="xsd1:ReportSwitchEntry" minOccurs="1" maxOccurs="1"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:simpleType name="ReportSwitchEntry">
+                    <xsd:annotation>
+                        <xsd:documentation>The possible values could be: exportBatch or exportBatchCSV. exportBatch generates a report in text file format and exportBatchCSV generates a report in CSV format with headers</xsd:documentation>
+                    </xsd:annotation>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:enumeration value="exportBatch" />
+                        <xsd:enumeration value="exportBatchCSV" />
+                    </xsd:restriction>
+            </xsd:simpleType>
+
+            <xsd:complexType name="ReportResponse">
+                <xsd:sequence>
+                    <xsd:element name="Response" type="xsd1:Response" minOccurs="1" maxOccurs="1"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+        </xsd:schema>
+    </types>
+
+    <message name="addSwitchRequest">
+        <part name="addSwitchRequest" type="xsd1:AddSwitch"/>
+    </message>
+
+    <message name="addSwitchResponse">
+        <part name="addSwitchResponse" type="xsd1:AddResponse"/>
+    </message>
+
+    <message name="updateSwitchRequest">
+        <part name="updateSwitchRequest" type="xsd1:UpdateSwitch"/>
+    </message>
+
+    <message name="updateSwitchResponse">
+        <part name="updateSwitchResponse" type="xsd1:UpdateResponse"/>
+    </message>
+
+    <message name="querySwitchRequest">
+        <part name="querySwitchRequest" type="xsd1:QuerySwitch"/>
+    </message>
+
+    <message name="querySwitchResponse">
+        <part name="querySwitchResponse" type="xsd1:QueryResponse"/>
+    </message>
+
+    <message name="deleteSwitchRequest">
+        <part name="deleteSwitchRequest" type="xsd1:DeleteSwitch"/>
+    </message>
+
+    <message name="deleteSwitchResponse">
+        <part name="deleteSwitchResponse" type="xsd1:DeleteResponse"/>
+    </message>
+
+    <message name="reportSwitchRequest">
+        <part name="reportSwitchRequest" type="xsd1:ReportSwitch"/>
+    </message>
+
+    <message name="reportSwitchResponse">
+        <part name="reportSwitchResponse" type="xsd1:ReportResponse"/>
+    </message>
+
+    <portType name="Address_PortType">
+
+        <operation name="addSwitchRequest">
+            <input message="tns:addSwitchRequest"/>
+            <output message="tns:addSwitchResponse"/>
+        </operation>
+
+        <operation name="updateSwitchRequest">
+            <input message="tns:updateSwitchRequest"/>
+            <output message="tns:updateSwitchResponse"/>
+        </operation>
+
+        <operation name="querySwitchRequest">
+            <input message="tns:querySwitchRequest"/>
+            <output message="tns:querySwitchResponse"/>
+        </operation>
+
+        <operation name="deleteSwitchRequest">
+            <input message="tns:deleteSwitchRequest"/>
+            <output message="tns:deleteSwitchResponse"/>
+        </operation>
+
+        <operation name="reportSwitchRequest">
+            <input message="tns:reportSwitchRequest"/>
+            <output message="tns:reportSwitchResponse"/>
+        </operation>
+    </portType>
+
+    <binding name="Address_Binding" type="tns:Address_PortType">
+        <soap:binding style="rpc"
+                      transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <operation name="addSwitchRequest">
+            <soap:operation soapAction="urn:e911SoapService"/>
+            <input>
+                <soap:body
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                    namespace="urn:e911SoapService" parts="addSwitchRequest"
+                                                    use="literal"/>
+            </input>
+            <output>
+                <soap:body
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                    namespace="urn:e911SoapService" parts="addSwitchResponse" use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="updateSwitchRequest">
+            <soap:operation soapAction="urn:e911SoapService"/>
+            <input>
+                <soap:body
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                    namespace="urn:e911SoapService" parts="updateSwitchRequest"
+                                                    use="literal"/>
+            </input>
+            <output>
+                <soap:body
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                    namespace="urn:e911SoapService" parts="updateSwitchResponse" use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="querySwitchRequest">
+            <soap:operation soapAction="urn:e911SoapService"/>
+            <input>
+                <soap:body
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                    namespace="urn:e911SoapService" parts="querySwitchRequest"
+                                                    use="literal"/>
+            </input>
+            <output>
+                <soap:body
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                    namespace="urn:e911SoapService" parts="querySwitchResponse" use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="deleteSwitchRequest">
+            <soap:operation soapAction="urn:e911SoapService"/>
+            <input>
+                <soap:body
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                    namespace="urn:e911SoapService" parts="deleteSwitchRequest"
+                                                    use="literal"/>
+            </input>
+            <output>
+                <soap:body
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                    namespace="urn:e911SoapService" parts="deleteSwitchResponse" use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="reportSwitchRequest">
+            <soap:operation soapAction="urn:e911SoapService"/>
+            <input>
+                <soap:body
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                    namespace="urn:e911SoapService" parts="reportSwitchRequest"
+                                                    use="literal"/>
+            </input>
+            <output>
+                <soap:body
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                    namespace="urn:e911SoapService" parts="reportSwitchResponse" use="literal"/>
+            </output>
+        </operation>
+    </binding>
+
+    <service name="Address_Service">
+        <port name="Address_Port" binding="tns:Address_Binding">
+            <soap:address location="http://soap.911enable.com/custSoapSwitches/"/>
+        </port>
+    </service>
+</definitions>

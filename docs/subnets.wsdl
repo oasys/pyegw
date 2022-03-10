@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="e911enable"
+  targetNamespace="http://soap.911enable.com/wsdl"
+  xmlns:tns="http://soap.911enable.com/wsdl"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:xsd1="http://soap.911enable.com/schema">
+
+  <documentation>
+    Web service to add, update, query, delete, report subnet from the EGW
+  </documentation>
+
+  <types>
+    <xsd:schema
+      targetNamespace="http://soap.911enable.com/schema"
+      xmlns="http://www.w3.org/2001/XMLSchema">
+
+      <xsd:complexType name="extendedAuth">
+        <xsd:sequence>
+          <xsd:element name="authentication" type="xsd1:auth" minOccurs="1" maxOccurs="1"/>
+          <xsd:element name="subnet" type="xsd1:subnet" minOccurs="1" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="basicAuth">
+        <xsd:sequence>
+          <xsd:element name="authentication" type="xsd1:auth" minOccurs="1" maxOccurs="1"/>
+          <xsd:element name="subnetIdent" type="xsd1:subnetID" minOccurs="1" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="auth">
+        <xsd:annotation>
+          <xsd:documentation>The expected username-password are configured in EGW locally. Settings are in Configuration - Advanced - Soap Server </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="username" type="xsd:string"/>
+          <xsd:element name="password" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="subnet">
+        <xsd:sequence>
+          <xsd:element name="subnetIdent" type="xsd1:subnetID" minOccurs="1" maxOccurs="1"/>
+          <xsd:element name="subnetMaskList" type="xsd1:subnetMask" minOccurs="1" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="subnetID">
+        <xsd:sequence>
+          <xsd:element name="erl_id" type="xsd:token" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="subnetMask">
+        <xsd:annotation>
+          <xsd:documentation>subnetMaskIP requires a valid IPv4 address. subnetMaskLength </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="subnetMaskIP" type="xsd1:IPv4" minOccurs="1" maxOccurs="1"/>
+          <xsd:element name="subnetMaskNum" type="xsd1:subnetMaskLength" minOccurs="1" maxOccurs="1"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:simpleType name="subnetMaskLength">
+        <xsd:annotation>
+          <xsd:documentation>A numerical value greater or equal than 1 and smaller or equal to 32 representing the subnet mask in binary dectobin((2^subnetMaskLength) - 1) </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:int">
+          <xsd:minInclusive value="1"/>
+          <xsd:maxInclusive value="32"/>
+        </xsd:restriction>
+      </xsd:simpleType>
+
+      <xsd:simpleType name="IPv4">
+        <xsd:annotation>
+          <xsd:documentation>An IPv4 dot-decimal notation. From http://en.wikipedia.org/wiki/IPv4</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:token">
+          <xsd:pattern value="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$" />
+        </xsd:restriction>
+      </xsd:simpleType>
+
+      <xsd:complexType name="userResponse">
+        <xsd:sequence>
+          <xsd:element name="status" type="xsd1:ReturnCodeType"/>
+          <xsd:element name="errorReturned" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="qryUserResponse">
+        <xsd:sequence>
+          <xsd:element name="status" type="xsd1:ReturnCodeType"/>
+          <xsd:element name="errorReturned" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+          <xsd:element name="subnetList" type="xsd1:subnet" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:simpleType name="ReturnCodeType">
+        <xsd:annotation>
+          <xsd:documentation>200=Success; 400=Bad Request; 401=Unauthorized; 404=Not Found; 500=Internal Server Error;</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+          <xsd:enumeration value="200" />
+          <xsd:enumeration value="400" />
+          <xsd:enumeration value="401" />
+          <xsd:enumeration value="404" />
+          <xsd:enumeration value="500" />
+        </xsd:restriction>
+      </xsd:simpleType>
+
+        <xsd:complexType name="ReportSubnet">
+            <xsd:sequence>
+                <xsd:element name="Authentication" type="xsd1:auth" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="ReportSubnetEntry" type="xsd1:ReportSubnetEntry" minOccurs="1" maxOccurs="1"/>
+            </xsd:sequence>
+        </xsd:complexType>
+
+        <xsd:simpleType name="ReportSubnetEntry">
+                <xsd:annotation>
+                    <xsd:documentation>exportBatch=Export Batch;exportBatchCSV=Export Batch CSV;</xsd:documentation>
+                </xsd:annotation>
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="exportBatch" />
+                    <xsd:enumeration value="exportBatchCSV" />
+                </xsd:restriction>
+        </xsd:simpleType>
+
+    </xsd:schema>
+  </types>
+
+  <message name="addOrUpdateSubnetRequest">
+    <part name="addOrUpdateSubnetRequest" type="xsd1:extendedAuth"/>
+  </message>
+
+  <message name="addOrUpdateSubnetResponse">
+    <part name="addOrUpdateSubnetResponse" type="xsd1:userResponse"/>
+  </message>
+
+  <message name="qrySubnetRequest">
+    <part name="qrySubnetRequest" type="xsd1:basicAuth"/>
+  </message>
+
+  <message name="qrySubnetResponse">
+    <part name="qrySubnetResponse" type="xsd1:qryUserResponse"/>
+  </message>
+
+  <message name="deleteSubnetRequest">
+    <part name="deleteSubnetRequest" type="xsd1:basicAuth"/>
+  </message>
+
+  <message name="deleteSubnetResponse">
+    <part name="deleteSubnetResponse" type="xsd1:userResponse"/>
+  </message>
+
+  <message name="reportSubnetRequest">
+    <part name="reportSubnetRequest" type="xsd1:ReportSubnet"/>
+  </message>
+
+  <message name="reportSubnetResponse">
+    <part name="reportSubnetResponse" type="xsd1:userResponse"/>
+  </message>
+
+  <portType name="Address_PortType">
+
+    <operation name="addOrUpdateSubnetRequest">
+      <input message="tns:addOrUpdateSubnetRequest"/>
+      <output message="tns:addOrUpdateSubnetResponse"/>
+    </operation>
+
+    <operation name="qrySubnetRequest">
+      <input message="tns:qrySubnetRequest"/>
+      <output message="tns:qrySubnetResponse"/>
+    </operation>
+
+    <operation name="deleteSubnetRequest">
+      <input message="tns:deleteSubnetRequest"/>
+      <output message="tns:deleteSubnetResponse"/>
+    </operation>
+
+    <operation name="reportSubnetRequest">
+      <input message="tns:reportSubnetRequest"/>
+      <output message="tns:reportSubnetResponse"/>
+    </operation>
+
+  </portType>
+
+  <binding name="Address_Binding" type="tns:Address_PortType">
+    <soap:binding style="rpc"
+      transport="http://schemas.xmlsoap.org/soap/http"/>
+
+    <operation name="addOrUpdateSubnetRequest">
+      <soap:operation soapAction="urn:e911SoapService"/>
+      <input>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="addOrUpdateSubnetRequest"
+          use="literal"/>
+      </input>
+      <output>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="addOrUpdateSubnetResponse" use="literal"/>
+      </output>
+    </operation>
+
+    <operation name="qrySubnetRequest">
+      <soap:operation soapAction="urn:e911SoapService"/>
+      <input>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="qrySubnetRequest"
+          use="literal"/>
+      </input>
+      <output>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="qrySubnetResponse" use="literal"/>
+      </output>
+    </operation>
+
+    <operation name="deleteSubnetRequest">
+      <soap:operation soapAction="urn:e911SoapService"/>
+      <input>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="deleteSubnetRequest"
+          use="literal"/>
+      </input>
+      <output>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="deleteSubnetResponse" use="literal"/>
+      </output>
+    </operation>
+
+
+      <operation name="reportSubnetRequest">
+      <soap:operation soapAction="urn:e911SoapService"/>
+      <input>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="reportSubnetRequest"
+          use="literal"/>
+      </input>
+      <output>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="reportSubnetResponse" use="literal"/>
+      </output>
+    </operation>
+</binding>
+
+  <service name="Address_Service">
+    <port name="Address_Port" binding="tns:Address_Binding">
+      <soap:address location="http://soap.911enable.com/custSoapSubnets/index.php/"/>
+    </port>
+  </service>
+</definitions>

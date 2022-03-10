@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="e911enable"
+  targetNamespace="http://soap.911enable.com/wsdl"
+  xmlns:tns="http://soap.911enable.com/wsdl"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:xsd1="http://soap.911enable.com/schema">
+
+  <documentation>
+    Web service to add, update, qry, delete, validate locations to the EGW. V2 with PIDF-LO Support
+  </documentation>
+
+  <types>
+    <xsd:schema
+      targetNamespace="http://soap.911enable.com/schema"
+      xmlns="http://www.w3.org/2001/XMLSchema">
+
+      <xsd:complexType name="LocationInfo">
+        <xsd:sequence>
+          <xsd:element name="location_id" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="erl_id" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="civicAddress" type="xsd1:civicAddress" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="local_gateway_enabled" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="direct_call_delivery" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="elins" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="security_desk_name" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="security_desk_phone" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="crisis_alert_email" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="url_data" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="wireless_locator_enabled" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="location_last_updated" type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="civicAddress">
+        <xsd:sequence>
+          <xsd:element name="HNO" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="HNS" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="BLD" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="PRD" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="RD" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="STS" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="POD" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="RDSEC" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="RDBR" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="RDSUBBR" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="PRM" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="POM" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="LMK" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="LOC" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="FLR" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="UNIT" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="ROOM" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="PLC" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="ADDCODE" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="SEAT" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="A2" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="A3" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="A4" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="A5" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="PCN" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="A1" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="country" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="PC" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="POBOX" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="NAM" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="userResponse">
+        <xsd:sequence>
+          <xsd:element name="status" type="xsd:integer"/>
+          <xsd:element name="errorReturned" type="xsd:string"/>
+          <xsd:element name="alternatives" type="xsd1:alts" minOccurs="0" maxOccurs="unbounded"/>
+          <xsd:element name="address_status" type="xsd1:addr_status" minOccurs="0"/>
+          <xsd:element name="LocationInfo" type="xsd1:LocationInfo" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+        <xsd:complexType name="QueryLocation">
+            <xsd:sequence>
+                <xsd:element name="username" type="xsd:string"/>
+                <xsd:element name="password" type="xsd:string"/>
+                <xsd:element name="QueryLocationEntry" type="xsd1:QueryLocationEntry" minOccurs="1" maxOccurs="1"/>
+            </xsd:sequence>
+        </xsd:complexType>
+
+        <xsd:complexType name="QueryLocationEntry">
+            <xsd:sequence>
+                <xsd:element name="location_id" type="xsd:integer" minOccurs="0" maxOccurs="1">
+                    <xsd:annotation>
+                        <xsd:documentation>If location_id is specified, the locations will be returned from the specified location id upto the next batch (matching the criteria) else the first batch (matching the criteria) will be returned.</xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="erl_id" type="xsd:string"/>
+            </xsd:sequence>
+        </xsd:complexType>
+
+        <xsd:complexType name="QueryResponse">
+            <xsd:sequence>
+                <xsd:element name="status" type="xsd:integer"/>
+                <xsd:element name="errorReturned" type="xsd:string"/>
+                <xsd:element name="LocationStatistics" type="xsd1:LocationStatistics" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="LocationCollection" type="xsd1:LocationCollection" minOccurs="0" maxOccurs="1"/>
+            </xsd:sequence>
+        </xsd:complexType>
+
+        <xsd:complexType name="LocationStatistics">
+            <xsd:sequence>
+                <xsd:element name="Message" type="xsd:string"/>
+                <xsd:element name="LowestLocationIDReturned" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="HighestLocationIDReturned" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="CountOfLocationsReturned" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="TotalNumberOfLocations" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+            </xsd:sequence>
+        </xsd:complexType>
+
+        <xsd:complexType name="LocationCollection">
+            <xsd:sequence>
+                <xsd:element name="LocationEntry" type="xsd1:LocationInfo" minOccurs="1" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+
+      <xsd:complexType name="elinStatResponse">
+        <xsd:sequence>
+          <xsd:element name="status" type="xsd:integer"/>
+          <xsd:element name="errorReturned" type="xsd:string"/>
+          <xsd:element name="total" type="xsd:integer" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="totalFree" type="xsd:integer" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="addr_status">
+        <xsd:sequence>
+          <xsd:element name="position_status" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="civic_status" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="msag_status" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="routing_status" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="responder_type" type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="alts">
+        <xsd:sequence>
+          <xsd:element name="houseNumberRange" type="xsd1:rangeChoice" minOccurs="0"/>
+          <xsd:element name="houseNumber" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="streetName" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="city" type="xsd:string"/>
+          <xsd:element name="state" type="xsd:string"/>
+          <xsd:element name="zipCode" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="rangeChoice">
+        <xsd:sequence>
+          <xsd:element name="low" type="xsd:integer" minOccurs="0"/>
+          <xsd:element name="high" type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="LocationProvisioning">
+        <xsd:sequence>
+          <xsd:element name="username" type="xsd:string"/>
+          <xsd:element name="password" type="xsd:string"/>
+          <xsd:element name="erl_id" type="xsd:string"/>
+          <xsd:element name="civicAddress" type="xsd1:civicAddress" maxOccurs="1"/>
+          <xsd:element name="local_gateway_enabled" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="direct_call_delivery" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="elins" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="security_desk_name" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="crisis_email_list" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="url_data" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="wireless_locator_enabled" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="force_csz" type="xsd:string" minOccurs="0" default="0"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="basicLocation">
+        <xsd:sequence>
+          <xsd:element name="username" type="xsd:string"/>
+          <xsd:element name="password" type="xsd:string"/>
+          <xsd:element name="erl_id" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="basicELIN">
+        <xsd:sequence>
+          <xsd:element name="username" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+          <xsd:element name="password" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+          <xsd:element name="elin" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="validateAddress">
+        <xsd:sequence>
+          <xsd:element name="username" type="xsd:string"/>
+          <xsd:element name="password" type="xsd:string"/>
+          <xsd:element name="civicAddress" type="xsd1:civicAddress" maxOccurs="1"/>
+          <xsd:element name="force_csz" type="xsd:string" default="0" minOccurs="0"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="ReportInfo">
+      	<xsd:sequence>
+      	  <xsd:element name="username" type="xsd:string"/>
+          <xsd:element name="password" type="xsd:string"/>
+      	  <xsd:element name="reportCode" type="xsd1:reportCodeType" minOccurs="1"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:simpleType name="reportCodeType">
+              <xsd:annotation>
+                  <xsd:documentation>exportBatch=Export Batch; exportBatchCSV=Export Batch in CSV; summary=Summary Report;</xsd:documentation>
+              </xsd:annotation>
+              <xsd:restriction base="xsd:string">
+                  <xsd:enumeration value="exportBatch" />
+                  <xsd:enumeration value="exportBatchCSV" />
+                  <xsd:enumeration value="summary" />
+              </xsd:restriction>
+      </xsd:simpleType>
+
+      <xsd:complexType name="userReportResponse">
+              <xsd:sequence>
+                <xsd:element name="status" type="xsd:integer"/>
+                <xsd:element name="errorReturned" type="xsd:string"/>
+              </xsd:sequence>
+      </xsd:complexType>
+
+    </xsd:schema>
+  </types>
+
+  <message name="addOrUpdateLocationRequest">
+    <part name="addOrUpdateLocationRequest" type="xsd1:LocationProvisioning"/>
+  </message>
+
+  <message name="addOrUpdateLocationResponse">
+    <part name="addOrUpdateLocationResponse" type="xsd1:userResponse"/>
+  </message>
+
+  <message name="qryLocationRequest">
+    <part name="qryLocationRequest" type="xsd1:basicLocation"/>
+  </message>
+
+  <message name="qryLocationResponse">
+    <part name="qryLocationResponse" type="xsd1:userResponse"/>
+  </message>
+
+  <message name="qryLocationByMatchingERLIDRequest">
+    <part name="qryLocationByMatchingERLIDRequest" type="xsd1:QueryLocation"/>
+  </message>
+
+  <message name="qryLocationByMatchingERLIDResponse">
+    <part name="qryLocationByMatchingERLIDResponse" type="xsd1:QueryResponse"/>
+  </message>
+
+  <message name="qryELINRequest">
+    <part name="qryELINRequest" type="xsd1:basicELIN"/>
+  </message>
+
+  <message name="qryELINResponse">
+    <part name="qryELINResponse" type="xsd1:userResponse"/>
+  </message>
+
+    <message name="qryELINStatRequest">
+    <part name="qryELINStatRequest" type="xsd1:basicELIN"/>
+  </message>
+
+  <message name="qryELINStatResponse">
+    <part name="qryELINStatResponse" type="xsd1:elinStatResponse"/>
+  </message>
+
+  <message name="validateAddressRequest">
+    <part name="validateAddressRequest" type="xsd1:validateAddress"/>
+  </message>
+
+  <message name="validateAddressResponse">
+    <part name="validateAddressResponse" type="xsd1:userResponse"/>
+  </message>
+
+  <message name="deleteLocationRequest">
+    <part name="deleteLocationRequest" type="xsd1:basicLocation"/>
+  </message>
+
+  <message name="deleteLocationResponse">
+    <part name="deleteLocationResponse" type="xsd1:userResponse"/>
+  </message>
+
+  <message name="generateReportRequest">
+      <part name="generateReportRequest" type="xsd1:ReportInfo"/>
+  </message>
+
+  <message name="generateReportResponse">
+      <part name="generateReportResponse" type="xsd1:userReportResponse"/>
+  </message>
+
+  <portType name="Address_PortType">
+
+    <operation name="addOrUpdateLocationRequest">
+      <input message="tns:addOrUpdateLocationRequest"/>
+      <output message="tns:addOrUpdateLocationResponse"/>
+    </operation>
+
+    <operation name="qryLocationRequest">
+      <input message="tns:qryLocationRequest"/>
+      <output message="tns:qryLocationResponse"/>
+    </operation>
+
+    <operation name="qryLocationByMatchingERLIDRequest">
+      <input message="tns:qryLocationByMatchingERLIDRequest"/>
+      <output message="tns:qryLocationByMatchingERLIDResponse"/>
+    </operation>
+
+    <operation name="qryELINRequest">
+      <input message="tns:qryELINRequest"/>
+      <output message="tns:qryELINResponse"/>
+    </operation>
+
+    <operation name="qryELINStatRequest">
+      <input message="tns:qryELINStatRequest"/>
+      <output message="tns:qryELINStatResponse"/>
+    </operation>
+
+    <operation name="deleteLocationRequest">
+      <input message="tns:deleteLocationRequest"/>
+      <output message="tns:deleteLocationResponse"/>
+    </operation>
+
+    <operation name="validateAddressRequest">
+      <input message="tns:validateAddressRequest"/>
+      <output message="tns:validateAddressResponse"/>
+    </operation>
+
+    <operation name="generateReportRequest">
+      <input message="tns:generateReportRequest"/>
+      <output message="tns:generateReportResponse"/>
+    </operation>
+
+  </portType>
+
+  <binding name="Address_Binding" type="tns:Address_PortType">
+    <soap:binding style="rpc"
+      transport="http://schemas.xmlsoap.org/soap/http"/>
+
+    <operation name="addOrUpdateLocationRequest">
+      <soap:operation soapAction="urn:e911SoapService"/>
+      <input>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="addOrUpdateLocationRequest"
+          use="literal"/>
+      </input>
+      <output>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="addOrUpdateLocationResponse" use="literal"/>
+      </output>
+    </operation>
+
+    <operation name="qryLocationRequest">
+      <soap:operation soapAction="urn:e911SoapService"/>
+      <input>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="qryLocationRequest"
+          use="literal"/>
+      </input>
+      <output>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="qryLocationResponse" use="literal"/>
+      </output>
+    </operation>
+
+    <operation name="qryLocationByMatchingERLIDRequest">
+      <soap:operation soapAction="urn:e911SoapService"/>
+      <input>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="qryLocationByMatchingERLIDRequest"
+          use="literal"/>
+      </input>
+      <output>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="qryLocationByMatchingERLIDResponse" use="literal"/>
+      </output>
+    </operation>
+
+    <operation name="qryELINRequest">
+          <soap:operation soapAction="urn:e911SoapService"/>
+          <input>
+            <soap:body
+              encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+              namespace="urn:e911SoapService" parts="qryELINRequest"
+              use="literal"/>
+          </input>
+          <output>
+            <soap:body
+              encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+              namespace="urn:e911SoapService" parts="qryELINResponse" use="literal"/>
+          </output>
+    </operation>
+
+    <operation name="qryELINStatRequest">
+          <soap:operation soapAction="urn:e911SoapService"/>
+          <input>
+            <soap:body
+              encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+              namespace="urn:e911SoapService" parts="qryELINStatRequest"
+              use="literal"/>
+          </input>
+          <output>
+            <soap:body
+              encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+              namespace="urn:e911SoapService" parts="qryELINStatResponse" use="literal"/>
+          </output>
+    </operation>
+    <operation name="deleteLocationRequest">
+      <soap:operation soapAction="urn:e911SoapService"/>
+      <input>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="deleteLocationRequest"
+          use="literal"/>
+      </input>
+      <output>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="deleteLocationResponse" use="literal"/>
+      </output>
+    </operation>
+
+    <operation name="validateAddressRequest">
+      <soap:operation soapAction="urn:e911SoapService"/>
+      <input>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="validateAddressRequest"
+          use="literal"/>
+      </input>
+      <output>
+        <soap:body
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+          namespace="urn:e911SoapService" parts="validateAddressResponse" use="literal"/>
+      </output>
+    </operation>
+
+    <operation name="generateReportRequest">
+          <soap:operation soapAction="urn:e911SoapService"/>
+          <input>
+            <soap:body
+              encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+              namespace="urn:e911SoapService" parts="generateReportRequest"
+              use="literal"/>
+          </input>
+          <output>
+            <soap:body
+              encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+              namespace="urn:e911SoapService" parts="generateReportResponse" use="literal"/>
+          </output>
+    </operation>
+
+  </binding>
+
+  <service name="Address_Service">
+    <port name="Address_Port" binding="tns:Address_Binding">
+      <soap:address location="http://soap.911enable.com/SERVICE"/>
+    </port>
+  </service>
+</definitions>
