@@ -65,16 +65,17 @@ class SubnetEndpoint(Endpoint):
     wsdl = "soapschemas/EGW/custSoapSubnets/custSoapSubnetsSimple.wsdl"
     location = "/custSoapSubnets/"
 
-    def get(self, erl_id):
+    def get(self, erl_id, silent=False):
         args = {
             "authentication": {**self.args},
             "subnetIdent": {"erl_id": erl_id},
         }
         response = self.client.service.qrySubnetRequest(args)
         if response.status != 200:
-            # TODO print error (silent?)
+            if not silent:
+                print("\n".join(response.errorReturned))
             return []
-        print(response)
+        return response.subnetList
 
     def set(self):
         args = {
@@ -85,7 +86,14 @@ class SubnetEndpoint(Endpoint):
         pass
 
     def from_dict(self, data):
-        pass
+        entry = self.client.factory.create("ns0:subnet")
+        entry.subnetIdent = data["erl_id"]
+        for prefix in data["subnet"].split(","):
+            subnet = self.client.factory.create("ns0:subnetMask")
+            subnet.subnetMaskIP, subnet.subnetMaskNum = prefix.split("/")
+            entry.subnetMaskList.append(subnet)
+
+        return entry
 
     def compare(self, data):
         pass
