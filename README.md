@@ -28,20 +28,20 @@ Each SOAP API endpoint is mapped to a python API class attribute:
 
 For consistency, these have a set of common methods.
 
-### get
+### get()
 
 Retrieves one (or multiple) records from the EGW database that match the
 calling criteria.
 
-### set
+### set()
 
 Adds or updates a single entry in the EGW database.
 
-### delete
+### delete()
 
 Deletes a matching entry in the EGW database.
 
-### from_dict
+### from_dict()
 
 Creates a local object corresponding to its endpoint subclass, assigning
 values from a provided dictionary.  The mapping of dictionary keys to object
