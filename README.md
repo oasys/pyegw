@@ -47,6 +47,8 @@ Creates a local object corresponding to its endpoint subclass, assigning
 values from a provided dictionary.  The mapping of dictionary keys to object
 attributes is compatible with the native EGW CSV import/export file format.
 
+See the [EGW System Guide](docs/EGW%205.6%20System%20Guide.pdf) for field definitions.
+
 Field names for ERLs/Locations:
 
 ```csv
