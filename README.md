@@ -76,3 +76,39 @@ egw = api("egw-a.example.com", "user", "pass")
 with open("switches.csv") as f:
     entries = [egw.switches.from_dict(record) for record in DictReader(f)]
 ```
+
+### compare()
+
+Test if two objects are identical or differ.  Useful to determine if
+updates to the EGW are required.
+
+## Endpoint-specific methods
+
+### locations
+
+#### get_single()
+
+`locations.get(ERL)` is a substring match on ERL_IDs. `get_single(ERL)`
+will search for an exact match.
+
+### switches
+
+#### get_all()
+
+`switches.get(IP)` typically matches only a single entry in the
+database, but the actual backend query is an SQL LIKE expression.
+This is a convenience method to call `get("%")`, returning all entries.
+
+#### get_single()
+
+`locations.get(IP)` is a substring match on switch IP. `get_single(IP)`
+will search for an exact match.
+
+#### delete_remaining()
+
+The `get/set/compare/delete` methods, by default, maintain a local
+cache of EGW objects.  This method will delete from the EGW any entries
+remaining in the cache.
+
+**NOTE** this deletes data.  Please ensure that all objects have been
+either `compare`d, `delete`d, or `set` before calling this method.
