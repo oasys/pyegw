@@ -54,8 +54,8 @@ class LocationEndpoint(Endpoint):
     def from_dict(self, data):
         csv_field = {
             # API field name : CSV field name
-            "security_desk_name": "SECURITY_DESK",
-            "crisis_alert_email": "CRISIS_EMAIL",
+            "security_desk_name": "security_desk",
+            "crisis_alert_email": "crisis_email",
         }
 
         location = self.client.factory.create("ns0:LocationInfo")
