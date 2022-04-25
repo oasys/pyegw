@@ -14,9 +14,11 @@ topology information.
 - Locations / ERLs
 - Switches and Ports
 - Subnets
+- Endpoints
 
-The other services, Endpoints (Analog and PBX), Layer2 3rd Party, and
-WLAN), are currently not implemented.
+The Endpoints API only implements identifying endpoints by IP PBX
+extension, not via MAC or IP address.  The other services, Layer2 3rd
+Party and WLAN, are currently not implemented.
 
 ## Common methods
 
@@ -25,6 +27,7 @@ Each SOAP API endpoint is mapped to a python API class attribute:
 - `api.locations`
 - `api.switches`
 - `api.subnets`
+- `api.endpoints`
 
 For consistency, these have a set of common methods.
 

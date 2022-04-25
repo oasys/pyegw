@@ -1,5 +1,6 @@
 import ssl
 
+from egw.endpoints import AnalogEndpoint
 from egw.locations import LocationEndpoint
 from egw.subnets import SubnetEndpoint
 from egw.switches import SwitchEndpoint
@@ -25,3 +26,4 @@ class Api(object):
         self.locations = LocationEndpoint(self)
         self.switches = SwitchEndpoint(self)
         self.subnets = SubnetEndpoint(self)
+        self.endpoints = AnalogEndpoint(self)
