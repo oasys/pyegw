@@ -1,7 +1,7 @@
-from egw.endpoint import Endpoint
+from egw.apiendpoint import ApiEndpoint
 
 
-class SubnetEndpoint(Endpoint):
+class SubnetEndpoint(ApiEndpoint):
     wsdl = "soapschemas/EGW/custSoapSubnets/custSoapSubnetsSimple.wsdl"
     location = "/custSoapSubnets/"
 

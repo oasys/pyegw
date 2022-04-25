@@ -1,7 +1,7 @@
-from egw.endpoint import Endpoint
+from egw.apiendpoint import ApiEndpoint
 
 
-class SwitchEndpoint(Endpoint):
+class SwitchEndpoint(ApiEndpoint):
     wsdl = "soapschemas/EGW/custSoapSwitches/custSoapSwitches.wsdl"
     location = "/custSoapSwitches/"
     _all_entries = "UNINITIALIZED"

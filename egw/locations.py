@@ -1,10 +1,10 @@
 from copy import copy
 from copy import deepcopy
 
-from egw.endpoint import Endpoint
+from egw.apiendpoint import ApiEndpoint
 
 
-class LocationEndpoint(Endpoint):
+class LocationEndpoint(ApiEndpoint):
     wsdl = "soapschemas/EGW/custSoapLocationsV2/custSoapLocations.wsdl"
     location = "/custSoapLocationsV2/"
 

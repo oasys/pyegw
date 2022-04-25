@@ -5,7 +5,7 @@ from urllib.parse import unquote
 from suds.client import Client
 
 
-class Endpoint(object):
+class ApiEndpoint(object):
     def __init__(self, api):
         self.api = api
         self.args = dict(username=self.api.user, password=self.api.password)
