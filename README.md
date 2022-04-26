@@ -70,6 +70,15 @@ Field names for subnets:
 operation,erl_id,subnet
 ```
 
+Field names for endpoints:
+
+```csv
+operation;pbx_name;endpoint;mac;erl_id;ip;description
+```
+
+Note that, unlike the others, the batch import format for endpoints on
+the EGW (and for `pyegw`) is a semicolon-delimited `.txt` file.
+
 Example import:
 
 ```python
